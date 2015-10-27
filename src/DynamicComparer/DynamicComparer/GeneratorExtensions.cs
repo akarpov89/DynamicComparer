@@ -16,7 +16,18 @@ namespace DynamicComparer
         public static LocalBuilder CastToType(this ILGenerator il, Type type)
         {
             var x = il.DeclareLocal(type);
-            il.Emit(OpCodes.Castclass, type);
+
+            // В случае типов-значений и примитивных типов выполняем распаковку
+            if (type.IsValueType || type.IsPrimitive)
+            {
+                il.Emit(OpCodes.Unbox_Any, type);
+            }
+            // В случае ссылочных типов выполняем приведение
+            else
+            {
+                il.Emit(OpCodes.Castclass, type);
+            }
+
             il.SetLocal(x);
             return x;
         }
@@ -48,25 +59,25 @@ namespace DynamicComparer
         public static void Compare(this ILGenerator il) => il.Emit(OpCodes.Ceq);
 
         // Извлекает из стека значение, если это false, то прыгает на заданную метку
-        public static void JumpWhenFalse(this ILGenerator il, Label whenFalse) => il.Emit(OpCodes.Brfalse, whenFalse);
+        public static void JumpWhenFalse(this ILGenerator il, Label whenFalse) => il.Emit(OpCodes.Brfalse_S, whenFalse);
 
         // Извлекает из стека значение, если это true, то прыгает на заданную метку
-        public static void JumpWhenTrue(this ILGenerator il, Label whenTrue) => il.Emit(OpCodes.Brtrue, whenTrue);
+        public static void JumpWhenTrue(this ILGenerator il, Label whenTrue) => il.Emit(OpCodes.Brtrue_S, whenTrue);
 
         // Извлекает из стека два значения, и если первое меньше второго, то прыгает на заданную метку
-        public static void JumpWhenLess(this ILGenerator il, Label whenLess) => il.Emit(OpCodes.Blt, whenLess);
+        public static void JumpWhenLess(this ILGenerator il, Label whenLess) => il.Emit(OpCodes.Blt_S, whenLess);
 
         // Извлекает из стека два значения, и если они равны, то прыгает на заданную метку
-        public static void JumpWhenEqual(this ILGenerator il, Label label) => il.Emit(OpCodes.Beq, label);
+        public static void JumpWhenEqual(this ILGenerator il, Label label) => il.Emit(OpCodes.Beq_S, label);
 
         // Прыгает на заданную метку
-        public static void Jump(this ILGenerator il, Label label) => il.Emit(OpCodes.Br, label);
+        public static void Jump(this ILGenerator il, Label label) => il.Emit(OpCodes.Br_S, label);
         
         // Загружает в стек значение заданной переменной
         public static void LoadLocal(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Ldloc, x);
 
         // Загружает в стек адрес заданной переменной
-        public static void LoadLocalAddress(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Ldloca, x);
+        public static void LoadLocalAddress(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Ldloca_S, x);
 
         // Извлекает из стека значение и присваивает его заданной переменной
         public static void SetLocal(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Stloc, x);

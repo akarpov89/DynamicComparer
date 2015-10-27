@@ -118,8 +118,8 @@ namespace DynamicComparer
                 {
                     CompareNullableValues(type, x, y, whenEqual);
                 }
-                // Примитивные типы
-                else if (type.IsPrimitive)
+                // Примитивные типы или перечисления
+                else if (type.IsPrimitive || type.IsEnum)
                 {
                     ComparePrimitives(type, x, y, whenEqual);
                 }
