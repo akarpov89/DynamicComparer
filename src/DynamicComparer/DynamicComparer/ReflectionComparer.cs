@@ -18,7 +18,7 @@ namespace DynamicComparer
                 .First(m => m.Name == "SequenceEqual" && m.GetParameters().Length == 3);
 
         private static MethodInfo GenericCompareArraysMethod =
-            typeof(ReflectionComparer).GetMethod("GenericCompareArrays", BindingFlags.NonPublic | BindingFlags.Static);
+            typeof(ReflectionComparer).GetMethod(nameof(GenericCompareArrays), BindingFlags.NonPublic | BindingFlags.Static);
 
         public new bool Equals(object x, object y)
         {
@@ -32,34 +32,24 @@ namespace DynamicComparer
 
         private bool CompareObjectsInternal(Type type, object x, object y)
         {
-            // Если ссылки указывают на один и тот же объект
             if (ReferenceEquals(x, y)) return true;
 
-            // Один из объектов равен null
             if (ReferenceEquals(x, null) != ReferenceEquals(y, null)) return false;
 
-            // Объекты имеют разные типы
             if (x.GetType() != y.GetType()) return false;
 
-            // Строки
             if (Type.GetTypeCode(type) == TypeCode.String) return ((string)x).Equals((string)y);
 
-            // Массивы
             if (type.IsArray) return CompareArrays(type, x, y);
             
-            // Коллекции
             if (type.IsImplementIEnumerable()) return CompareEnumerables(type, x, y);
 
-            // Ссылочные типы
             if (type.IsClass || type.IsInterface) return CompareAllProperties(type, x, y);
 
-            // Примитивные типы или типы перечислений
             if (type.IsPrimitive || type.IsEnum) return x.Equals(y);
 
-            // Обнуляемые типы
             if (type.IsNullable()) return CompareNullables(type, x, y);
 
-            // Структуры
             if (type.IsValueType) return CompareAllProperties(type, x, y);
 
             return x.Equals(y);
@@ -129,7 +119,6 @@ namespace DynamicComparer
             
             if (elementType.IsValueType)
             {
-                // Массивы типов-значений не приводятся к массиву object, поэтому используем Array
                 xLength = ((Array) x).Length;
                 yLength = ((Array) y).Length;
             }

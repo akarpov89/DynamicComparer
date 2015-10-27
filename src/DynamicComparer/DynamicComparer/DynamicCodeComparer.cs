@@ -14,20 +14,13 @@ namespace DynamicComparer
 
         public new bool Equals(object x, object y)
         {
-            // Если ссылки указывают на один и тот же объект
             if (ReferenceEquals(x, y)) return true;
 
-            // Один из объектов равен null
             if (ReferenceEquals(x, null) != ReferenceEquals(y, null)) return false;
 
             Type xType = x.GetType();
 
-            // Объекты имеют разные типы
             if (xType != y.GetType()) return false;
-
-            //
-            // Проверяем наличие компарера в кэше. Если нет, то создаём его и сохраняем в кэш
-            //
 
             Comparer comparer;
             if (!ComparerCache.TryGetValue(xType, out comparer))
@@ -45,7 +38,6 @@ namespace DynamicComparer
 
         private class ComparerDelegateGenerator
         {
-            // Генератор кода динамического метода
             private ILGenerator il;
 
             public Comparer Generate(Type type)
@@ -54,82 +46,61 @@ namespace DynamicComparer
 
                 il = dynamicMethod.GetILGenerator();
 
-                //
-                // Загружаем аргументы и прикастовываем их к типу времени выполнения
-                //
-
                 il.LoadFirstArg();
                 var arg0 = il.CastToType(type);
                 
                 il.LoadSecondArg();
                 var arg1 = il.CastToType(type);
                 
-                // Сравниваем значения
                 CompareObjectsInternal(type, arg0, arg1);
 
-                // Если управление дошло до этого места, значит объекты равны
                 il.ReturnTrue();
 
-                // Создаём делегат для выполнения динамического метода
                 return (Comparer)dynamicMethod.CreateDelegate(typeof(Comparer));
             }
 
             private void CompareObjectsInternal(Type type, LocalBuilder x, LocalBuilder y)
             {
-                // Объявляем метку, на которую будем прыгать в случае, если объекты равны
                 var whenEqual = il.DefineLabel();
 
-                // Если объекты не являются типами-значений
                 if (!type.IsValueType)
                 {
-                    // Тут же возвращаем true, если ссылки равны между собой
                     JumpIfReferenceEquals(x, y, whenEqual);
-
-                    // Если один из объектов равен null, а второй нет возвращаем false
                     ReturnFalseIfOneIsNull(x, y);
 
-                    // Массивы
                     if (type.IsArray)
                     {
                         CompareArrays(type.GetElementType(), x, y);
                     }
-                    // Классы или интерфейсы
                     else if (type.IsClass || type.IsInterface)
                     {
-                        // Строки
                         if (Type.GetTypeCode(type) == TypeCode.String)
                         {
                             CompareStrings(x, y, whenEqual);
                         }
-                        // Коллекции
                         else if (type.IsImplementIEnumerable())
                         {
                             CompareEnumerables(type, x, y);
                         }
-                        // Любые другие классы или интерфейсы
                         else
                         {
                             CompareAllProperties(type, x, y);
                         }
                     }
                 }
-                // Обнуляемые типы
                 else if (type.IsNullable())
                 {
                     CompareNullableValues(type, x, y, whenEqual);
                 }
-                // Примитивные типы или перечисления
                 else if (type.IsPrimitive || type.IsEnum)
                 {
                     ComparePrimitives(type, x, y, whenEqual);
                 }
-                // Структуры
                 else
                 {
                     CompareAllProperties(type, x, y);
                 }
 
-                // Ставим метку, на которую будем прыгать в случае, если объекты равны
                 il.MarkLabel(whenEqual);
             }
 
@@ -149,37 +120,37 @@ namespace DynamicComparer
 
             private void CompareArrays(Type elementType, LocalBuilder x, LocalBuilder y)
             {
-                var loop = il.DefineLabel();  // Объявляем метку начала цикла сравнения элементов
+                var loop = il.DefineLabel();
 
-                il.LoadArrayLength(x);        // Загружаем длину первого массива
-                il.LoadArrayLength(y);        // Загружаем длину второго массива
-                il.JumpWhenEqual(loop);       // Если длины равны, то переходим к циклу
-                il.ReturnFalse();             // Иначе возрвщаем false
+                il.LoadArrayLength(x);
+                il.LoadArrayLength(y);
+                il.JumpWhenEqual(loop);
+                il.ReturnFalse();
 
-                il.MarkLabel(loop);           // Отмечаем метку начала цикла
+                il.MarkLabel(loop);
 
-                var index = il.DeclareLocal(typeof(int)); // Объявляем счётчик цикла - индекс
-                var loopCondition = il.DefineLabel();     // Объявляем метку на проверку условия выхода из цикла
-                var loopBody = il.DefineLabel();          // Объявляем метку на тело цикла
+                var index = il.DeclareLocal(typeof(int));
+                var loopCondition = il.DefineLabel();
+                var loopBody = il.DefineLabel();
 
-                il.LoadZero();            // 
-                il.SetLocal(index);       // Обнуляем индекс
-                il.Jump(loopCondition);   // Прыгаем на проверку условия цикла
+                il.LoadZero();
+                il.SetLocal(index);
+                il.Jump(loopCondition);
 
-                il.MarkLabel(loopBody);   // Отмечаем начало тела цикла
+                il.MarkLabel(loopBody);
                 {
-                    var xElement = il.GetArrayElement(elementType, x, index); // Получаем элемент первого массива
-                    var yElement = il.GetArrayElement(elementType, y, index); // Получаем элемент второго массива
+                    var xElement = il.GetArrayElement(elementType, x, index);
+                    var yElement = il.GetArrayElement(elementType, y, index);
 
-                    CompareObjectsInternal(elementType, xElement, yElement);  // Сравниваем элементы
-                    il.Increment(index);                                      // Увеличиваем счётчик
+                    CompareObjectsInternal(elementType, xElement, yElement);
+                    il.Increment(index);
                 }
 
-                il.MarkLabel(loopCondition);     // Отмечаем метку проверки условия выхода из цикла
+                il.MarkLabel(loopCondition);
                 {
-                    il.LoadLocal(index);         // Загружаем текущее значение  индекса
-                    il.LoadArrayLength(x);       // Загружаем длину массива
-                    il.JumpWhenLess(loopBody);   // Если индекс не вышел за пределы диапазона, то прыгаем в тело цикла
+                    il.LoadLocal(index);
+                    il.LoadArrayLength(x);
+                    il.JumpWhenLess(loopBody);
                 }
             }
 
