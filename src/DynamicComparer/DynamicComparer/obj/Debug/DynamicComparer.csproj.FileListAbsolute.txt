@@ -1,5 +1,0 @@
-C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer\bin\Debug\DynamicComparer.dll
-C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer\bin\Debug\DynamicComparer.pdb
-C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer\obj\Debug\DynamicComparer.dll
-C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer\obj\Debug\DynamicComparer.pdb
-C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer\obj\Debug\DynamicComparer.csprojResolveAssemblyReference.cache
