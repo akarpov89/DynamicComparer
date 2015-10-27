@@ -170,6 +170,7 @@ namespace DynamicComparer
                 {
                     var xElement = il.GetArrayElement(elementType, x, index); // Получаем элемент первого массива
                     var yElement = il.GetArrayElement(elementType, y, index); // Получаем элемент второго массива
+
                     CompareObjectsInternal(elementType, xElement, yElement);  // Сравниваем элементы
                     il.Increment(index);                                      // Увеличиваем счётчик
                 }

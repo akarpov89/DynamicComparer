@@ -1,10 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace DynamicComparer.Test
 {
+    enum E
+    {
+        A,
+        B
+    }
+
+    public struct S
+    {
+        private int _a;
+        private string _b;
+
+        public int A => _a;
+        public string B => _b;
+
+        public S(int a, string b)
+        {
+            _a = a;
+            _b = b;
+        }
+    }
+
     public class Primitive
     {
         public int A { get; set; }
@@ -46,6 +65,14 @@ namespace DynamicComparer.Test
                 J = J, K = K, L = L, M = M, N = N
             };
         }
+    }
+
+    public class X
+    {
+        public Primitive A { get; set; }
+        public S B { get; set; }
+        public int[] C { get; set; }
+        public List<int> D { get; set; }
     }
 
 }

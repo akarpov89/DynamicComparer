@@ -59,25 +59,25 @@ namespace DynamicComparer
         public static void Compare(this ILGenerator il) => il.Emit(OpCodes.Ceq);
 
         // Извлекает из стека значение, если это false, то прыгает на заданную метку
-        public static void JumpWhenFalse(this ILGenerator il, Label whenFalse) => il.Emit(OpCodes.Brfalse_S, whenFalse);
+        public static void JumpWhenFalse(this ILGenerator il, Label whenFalse) => il.Emit(OpCodes.Brfalse, whenFalse);
 
         // Извлекает из стека значение, если это true, то прыгает на заданную метку
-        public static void JumpWhenTrue(this ILGenerator il, Label whenTrue) => il.Emit(OpCodes.Brtrue_S, whenTrue);
+        public static void JumpWhenTrue(this ILGenerator il, Label whenTrue) => il.Emit(OpCodes.Brtrue, whenTrue);
 
         // Извлекает из стека два значения, и если первое меньше второго, то прыгает на заданную метку
-        public static void JumpWhenLess(this ILGenerator il, Label whenLess) => il.Emit(OpCodes.Blt_S, whenLess);
+        public static void JumpWhenLess(this ILGenerator il, Label whenLess) => il.Emit(OpCodes.Blt, whenLess);
 
         // Извлекает из стека два значения, и если они равны, то прыгает на заданную метку
-        public static void JumpWhenEqual(this ILGenerator il, Label label) => il.Emit(OpCodes.Beq_S, label);
+        public static void JumpWhenEqual(this ILGenerator il, Label label) => il.Emit(OpCodes.Beq, label);
 
         // Прыгает на заданную метку
-        public static void Jump(this ILGenerator il, Label label) => il.Emit(OpCodes.Br_S, label);
+        public static void Jump(this ILGenerator il, Label label) => il.Emit(OpCodes.Br, label);
         
         // Загружает в стек значение заданной переменной
         public static void LoadLocal(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Ldloc, x);
 
         // Загружает в стек адрес заданной переменной
-        public static void LoadLocalAddress(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Ldloca_S, x);
+        public static void LoadLocalAddress(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Ldloca, x);
 
         // Извлекает из стека значение и присваивает его заданной переменной
         public static void SetLocal(this ILGenerator il, LocalBuilder x) => il.Emit(OpCodes.Stloc, x);
@@ -134,7 +134,71 @@ namespace DynamicComparer
         }
 
         // Извлекает из стека массив и индекса, а загружает в стек элемент массива с заданным индексом
-        public static void LoadArrayElement(this ILGenerator il) => il.Emit(OpCodes.Ldelem_I4);
+        public static void LoadArrayElement(this ILGenerator il, Type type)
+        {
+            if (type.IsEnum)
+            {
+                type = Enum.GetUnderlyingType(type);
+            }
+
+            if (type.IsPrimitive)
+            {
+                if (type == typeof (IntPtr) || type == typeof (UIntPtr))
+                {
+                    il.Emit(OpCodes.Ldelem_I);
+                }
+                else
+                {
+                    OpCode opCode;
+
+                    switch (Type.GetTypeCode(type))
+                    {
+                        case TypeCode.Boolean:
+                        case TypeCode.Int32:
+                            opCode = OpCodes.Ldelem_I4;
+                            break;
+                        case TypeCode.Char:
+                        case TypeCode.UInt16:
+                            opCode = OpCodes.Ldelem_U2;
+                            break;
+                        case TypeCode.SByte:
+                            opCode = OpCodes.Ldelem_I1;
+                            break;
+                        case TypeCode.Byte:
+                            opCode = OpCodes.Ldelem_U1;
+                            break;
+                        case TypeCode.Int16:
+                            opCode = OpCodes.Ldelem_I2;
+                            break;
+                        case TypeCode.UInt32:
+                            opCode = OpCodes.Ldelem_U4;
+                            break;
+                        case TypeCode.Int64:
+                        case TypeCode.UInt64:
+                            opCode = OpCodes.Ldelem_I8;
+                            break;
+                        case TypeCode.Single:
+                            opCode = OpCodes.Ldelem_R4;
+                            break;
+                        case TypeCode.Double:
+                            opCode = OpCodes.Ldelem_R8;
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    il.Emit(opCode);
+                }
+            }
+            else if (type.IsValueType)
+            {
+                il.Emit(OpCodes.Ldelema, type);
+            }
+            else
+            {
+                il.Emit(OpCodes.Ldelem_Ref);
+            }
+        }
 
         // Возвращает новую переменную, содержащую элемент массива с заданным индексом
         public static LocalBuilder GetArrayElement(this ILGenerator il, Type elementType, LocalBuilder array, LocalBuilder index)
@@ -142,7 +206,7 @@ namespace DynamicComparer
             var x = il.DeclareLocal(elementType);
             il.LoadLocal(array);
             il.LoadLocal(index);
-            il.LoadArrayElement();
+            il.LoadArrayElement(elementType);
             il.SetLocal(x);
             return x;
         }
