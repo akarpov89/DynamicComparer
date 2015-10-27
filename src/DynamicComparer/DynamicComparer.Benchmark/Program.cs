@@ -9,15 +9,19 @@ namespace DynamicComparer.Benchmark
 {
     public struct Struct
     {
-        public int A;
-        public double B;
-        public string C;
+        private int m_a;
+        private double m_b;
+        private string m_c;
+
+        public int A => m_a;
+        public double B => m_b;
+        public string C => m_c;
 
         public Struct(int a, double b, string c)
         {
-            A = a;
-            B = b;
-            C = c;
+            m_a = a;
+            m_b = b;
+            m_c = c;
         }
     }
 
@@ -96,47 +100,60 @@ namespace DynamicComparer.Benchmark
             J = float.MaxValue
         };
 
-        private ReflectionComparer comparer = new ReflectionComparer();
+        private ReflectionComparer reflectionComparer = new ReflectionComparer();
+        private DynamicCodeComparer dynamicCodeComparer = new DynamicCodeComparer();
 
         [Benchmark]
         public void ReflectionCompare()
         {
-            var _ = comparer.Equals(x, y);
+            var _ = reflectionComparer.Equals(x, y);
+        }
+
+        [Benchmark]
+        public void DynamicCodeCompare()
+        {
+            var _ = dynamicCodeComparer.Equals(x, y);
         }
 
         [Benchmark]
         public void ManualCompare()
         {
-            if (x == y) return;
-            if (x.A != y.A) return;
-            if (x.B != y.B) return;
-            if (x.C != y.C) return;
-            if (x.D != y.D) return;
+            var _ = CompareComplexObjects();
+        }
+
+        private bool CompareComplexObjects()
+        {
+            if (x == y) return true;
+            if (x.A != y.A) return false;
+            if (x.B != y.B) return false;
+            if (x.C != y.C) return false;
+            if (x.D != y.D) return false;
             if (x.E != y.E)
             {
-                if (x.E.A != y.E.A) return;
+                if (x.E.A != y.E.A) return false;
                 var s1 = x.E.B;
                 var s2 = y.E.B;
-                if (s1.A != s2.A) return;
-                if (!s1.B.Equals(s2.B)) return;
-                if (s1.C != s2.C) return;
+                if (s1.A != s2.A) return false;
+                if (!s1.B.Equals(s2.B)) return false;
+                if (s1.C != s2.C) return false;
             }
-            if (x.F != y.F) return;
+            if (x.F != y.F) return false;
             if (x.G != y.G)
             {
-                if (x.G?.Length != y.G?.Length) return;
+                if (x.G?.Length != y.G?.Length) return false;
                 int[] a = x.G, b = y.G;
                 for (int i = 0; i < a.Length; ++i)
                 {
-                    if (a[i] != b[i]) return;
+                    if (a[i] != b[i]) return false;
                 }
             }
             if (x.H != y.H)
             {
-                if (!x.H.SequenceEqual(y.H)) return;
+                if (!x.H.SequenceEqual(y.H)) return false;
             }
-            if (!x.I.Equals(y.I)) return;
-            if (!x.J.Equals(y.J)) return;
+            if (!x.I.Equals(y.I)) return false;
+            if (!x.J.Equals(y.J)) return false;
+            return true;
         }
     }
 
@@ -148,35 +165,50 @@ namespace DynamicComparer.Benchmark
         private SimpleClass x = new SimpleClass { A = 42, B = new Struct(42, 3.14, "meow") };
         private SimpleClass y = new SimpleClass { A = 42, B = new Struct(42, 3.14, "meow") };
 
-        private ReflectionComparer comparer = new ReflectionComparer();
+        private ReflectionComparer reflectionComparer = new ReflectionComparer();
+        private DynamicCodeComparer dynamicCodeComparer = new DynamicCodeComparer();
 
         [Benchmark]
         public void ReflectionCompare()
         {
-            var _ = comparer.Equals(x, y);
+            var _ = reflectionComparer.Equals(x, y);
+        }
+
+        [Benchmark]
+        public void DynamicCodeCompare()
+        {
+            var _ = dynamicCodeComparer.Equals(x, y);
         }
 
         [Benchmark]
         public void ManualCompare()
         {
-            if (x == y) return;
-            if (x.A != y.A) return;
+            var _ = CompareSimpleObjects();
+        }
+
+        private bool CompareSimpleObjects()
+        {
+            if (x == y) return true;
+            if (x.A != y.A) return false;
             var s1 = x.B;
             var s2 = y.B;
-            if (s1.A != s2.A) return;
-            if (!s1.B.Equals(s2.B)) return;
-            if (s1.C != s2.C) return;
+            if (s1.A != s2.A) return false;
+            if (!s1.B.Equals(s2.B)) return false;
+            if (s1.C != s2.C) return false;
+            return true;
         }
     }
+
+    
 
     class Program
     {
         static void Main(string[] args)
-        {
+        {            
             IBenchmarkLogger[] loggers = 
             {
                 new BenchmarkConsoleLogger(),
-                new BenchmarkStreamLogger("reflection_vs_manual_simple.md")
+                new BenchmarkStreamLogger("simple_all.md")
             };
             var runner = new BenchmarkRunner(loggers);
             var reports = runner.RunCompetition(new SimpleComparisonTest()).ToList();

@@ -1,4 +1,3 @@
-C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer.Benchmark\bin\Debug\SimpleComparisonTest_ManualCompare_Throughput_X64_LegacyJit_NET-HostFramework\obj\x64\Release\Program.csprojResolveAssemblyReference.cache
 C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer.Benchmark\bin\Debug\SimpleComparisonTest_ManualCompare_Throughput_X64_LegacyJit_NET-HostFramework\Program.exe.config
 C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer.Benchmark\bin\Debug\SimpleComparisonTest_ManualCompare_Throughput_X64_LegacyJit_NET-HostFramework\obj\x64\Release\Program.exe
 C:\Users\Andrew\Documents\GitHub\DynamicComparer\src\DynamicComparer\DynamicComparer.Benchmark\bin\Debug\SimpleComparisonTest_ManualCompare_Throughput_X64_LegacyJit_NET-HostFramework\obj\x64\Release\Program.pdb
