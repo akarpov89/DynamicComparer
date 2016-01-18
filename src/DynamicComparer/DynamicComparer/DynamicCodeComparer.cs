@@ -92,7 +92,7 @@ namespace DynamicComparer
                 {
                     CompareNullableValues(type, x, y, whenEqual);
                 }
-                else if (type.IsPrimitive || type.IsEnum)
+                else if (type.IsPrimitive || type.IsEnum || type == typeof(DateTime))
                 {
                     ComparePrimitives(type, x, y, whenEqual);
                 }
@@ -303,7 +303,7 @@ namespace DynamicComparer
                 il.LoadLocal(x);
                 il.LoadLocal(y);
 
-                if (type != typeof(IntPtr) && type != typeof(UIntPtr))
+                if (type != typeof(IntPtr) && type != typeof(UIntPtr) && type != typeof(DateTime))
                 {
                     il.JumpWhenEqual(whenEqual);
                     il.ReturnFalse();

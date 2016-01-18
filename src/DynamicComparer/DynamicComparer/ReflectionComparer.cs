@@ -46,7 +46,7 @@ namespace DynamicComparer
 
             if (type.IsClass || type.IsInterface) return CompareAllProperties(type, x, y);
 
-            if (type.IsPrimitive || type.IsEnum) return x.Equals(y);
+            if (type.IsPrimitive || type.IsEnum || type == typeof(DateTime)) return x.Equals(y);
 
             if (type.IsNullable()) return CompareNullables(type, x, y);
 

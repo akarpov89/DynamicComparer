@@ -73,6 +73,7 @@ namespace DynamicComparer.Test
         public S B { get; set; }
         public int[] C { get; set; }
         public List<int> D { get; set; }
+        public DateTime E { get; set; }
     }
 
 }

@@ -40,6 +40,8 @@ namespace DynamicComparer.Test
                 yield return Case("text", "text1", false);
                 yield return Case(E.A, E.A, true);
                 yield return Case(E.A, E.B, false);
+                yield return Case(new DateTime(2016, 1, 19), new DateTime(2016, 1, 19), true);
+                yield return Case(new DateTime(2016, 1, 19), new DateTime(2016, 1, 20), false);
                 yield return Case(Primitive.Create(), Primitive.Create(), true);
                 yield return Case(Primitive.Create(), Primitive.Create().WithNaNs(), false);
                 yield return Case(new S(42, "42"), new S(42, "42"), true);
@@ -61,16 +63,36 @@ namespace DynamicComparer.Test
                         A = Primitive.Create(),
                         B = new S(42, "42"),
                         C = new[] {1, 2, 3},
-                        D = new List<int> {1, 2, 3}
+                        D = new List<int> {1, 2, 3},
+                        E = new DateTime(2016, 1, 19)
                     },
                     new X
                     {
                         A = Primitive.Create(),
                         B = new S(42, "42"),
                         C = new[] {1, 2, 3},
-                        D = new List<int> {1, 2, 3}
+                        D = new List<int> {1, 2, 3},
+                        E = new DateTime(2016, 1, 19)
                     },
                     true);
+                yield return Case(
+                    new X
+                    {
+                        A = Primitive.Create(),
+                        B = new S(42, "42"),
+                        C = new[] { 1, 2, 3 },
+                        D = new List<int> { 1, 2, 3 },
+                        E = new DateTime(2016, 1, 19)
+                    },
+                    new X
+                    {
+                        A = Primitive.Create(),
+                        B = new S(42, "42"),
+                        C = new[] { 1, 2, 3 },
+                        D = new List<int> { 1, 2, 3 },
+                        E = new DateTime(2016, 1, 20)
+                    },
+                    false);
             }
         } 
     }
