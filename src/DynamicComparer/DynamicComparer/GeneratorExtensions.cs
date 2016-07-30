@@ -145,7 +145,7 @@ namespace DynamicComparer
             }
             else if (type.IsValueType)
             {
-                il.Emit(OpCodes.Ldelema, type);
+                il.Emit(OpCodes.Ldelem, type);
             }
             else
             {

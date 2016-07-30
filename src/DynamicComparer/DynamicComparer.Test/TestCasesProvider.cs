@@ -33,6 +33,7 @@ namespace DynamicComparer.Test
                 yield return Case((int?) 1, (int?) 1, true);
                 yield return Case((int?) 1, null, false);
                 yield return Case((double?) 0.5, (double?) 0.5, true);
+                yield return Case((double?) 0.5, null, false);
                 yield return Case(new IntPtr(1), new IntPtr(1), true);
                 yield return Case(new IntPtr(1), new IntPtr(2), false);
                 yield return Case("text", "text", true);
@@ -93,6 +94,16 @@ namespace DynamicComparer.Test
                         E = new DateTime(2016, 1, 20)
                     },
                     false);
+                yield return Case(
+                    new Y
+                    {
+                        A = new double?[] {2, null}
+                    },
+                    new Y
+                    {
+                        A = new double?[] {2, null}
+                    },
+                    true);
             }
         } 
     }

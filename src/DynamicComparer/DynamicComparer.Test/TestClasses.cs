@@ -76,4 +76,8 @@ namespace DynamicComparer.Test
         public DateTime E { get; set; }
     }
 
+    public class Y
+    {
+        public double?[] A { get; set; }
+    }
 }
